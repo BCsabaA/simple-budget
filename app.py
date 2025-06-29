@@ -1,15 +1,22 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
+from auth import auth_bp
 
 app = Flask(__name__)
+app.secret_key = 'valami_nagyon_titkos_kulcs'  # célszerű .env-ből olvasni
+
+app.register_blueprint(auth_bp)
 
 def get_db_connection():
     conn = sqlite3.connect('expense.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-@app.route('/', methods=['GET'])
+@app.route('/')
 def index():
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+
     type_filter = request.args.get('type')  # 'income' vagy 'expense' vagy None
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')

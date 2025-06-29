@@ -129,6 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+create_user*
 
 # Spyder project settings
 .spyderproject
