@@ -3,7 +3,9 @@ import sqlite3
 from auth import auth_bp
 
 app = Flask(__name__)
-app.secret_key = 'valami_nagyon_titkos_kulcs'  # célszerű .env-ből olvasni
+
+import os
+app.secret_key = os.environ.get('SECRET_KEY', 'dev_key')
 
 app.register_blueprint(auth_bp)
 
