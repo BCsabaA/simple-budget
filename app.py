@@ -56,6 +56,33 @@ def index():
         date_to=date_to
     )
 
+from collections import defaultdict
+from flask import jsonify
+
+@app.route('/stats')
+def stats():
+    if 'user' not in session:
+        return redirect(url_for('auth.login'))
+
+    conn = get_db_connection()
+    rows = conn.execute('SELECT date, amount, type FROM transactions').fetchall()
+    conn.close()
+
+    data = defaultdict(lambda: {'income': 0, 'expense': 0})
+
+    for row in rows:
+        month = row['date'][:7]  # pl. '2025-06'
+        data[month][row['type']] += row['amount']
+
+    # Rendezzük dátum szerint
+    sorted_data = sorted(data.items())
+
+    labels = [month for month, _ in sorted_data]
+    incomes = [val['income'] for _, val in sorted_data]
+    expenses = [val['expense'] for _, val in sorted_data]
+
+    return render_template('stats.html', labels=labels, incomes=incomes, expenses=expenses)
+
 @app.route('/add', methods=['POST'])
 def add():
     amount = request.form['amount']
